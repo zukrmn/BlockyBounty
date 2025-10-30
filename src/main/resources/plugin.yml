@@ -1,0 +1,6 @@
+name: BlockyBounty
+version: 1.0.0
+main: com.blockycraft.blockybounty.BlockyBounty
+author: Bernardo Zukerman
+description: Adicione sistema de recompensas ao eliminar outro jogador
+api-version: 1.0
