@@ -6,26 +6,26 @@ import com.blockycraft.blockybounty.manager.BountyManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityListener;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import java.util.List;
 
-public class BountyDeathListener extends EntityListener {
-
+public class BountyDeathListener implements Listener {
     private final BountyManager bountyManager;
 
     public BountyDeathListener(BlockyBounty plugin) {
         this.bountyManager = plugin.getBountyManager();
     }
 
-    @Override
+    @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         if (!(event.getEntity() instanceof Player)) return;
         Player victim = (Player) event.getEntity();
 
-        // Compatível com Bukkit 1060: procura killer pelo último golpe
+        // Obtém killer compatível com Bukkit 1060: último golpe
         Player killer = null;
         EntityDamageEvent lastDamage = victim.getLastDamageCause();
         if (lastDamage instanceof EntityDamageByEntityEvent) {
@@ -46,13 +46,12 @@ public class BountyDeathListener extends EntityListener {
             Class<?> api = Class.forName("com.blockycraft.blockyfactions.api.BlockyFactionsAPI");
             String killerFaction = (String) api.getMethod("getPlayerFaction", String.class).invoke(null, killer.getName());
             String victimFaction = (String) api.getMethod("getPlayerFaction", String.class).invoke(null, victim.getName());
-            if (killerFaction != null && !killerFaction.isEmpty() &&
-                victimFaction != null && !victimFaction.isEmpty() &&
-                killerFaction.equals(victimFaction)) {
+            if (killerFaction != null && !killerFaction.isEmpty()
+                    && victimFaction != null && !victimFaction.isEmpty()
+                    && killerFaction.equals(victimFaction)) {
                 bloqueia = true;
             }
         } catch (NoSuchMethodException nsme) {
-            // fallback: tenta arePlayersInSameFaction (modo legacy) se não houver getPlayerFaction
             try {
                 Class<?> api = Class.forName("com.blockycraft.blockyfactions.api.BlockyFactionsAPI");
                 Object res = api.getMethod("arePlayersInSameFaction", String.class, String.class)
@@ -69,8 +68,8 @@ public class BountyDeathListener extends EntityListener {
 
         if (bloqueia) {
             killer.sendMessage(BlockyBounty.getInstance().getMessageManager().get(
-                "bounty.killer-faction",
-                "&cJogadores da mesma faccao nao podem resgatar recompensa. A recompensa permanecera ativa."
+                    "bounty.killer-faction",
+                    "&cJogadores da mesma faccao nao podem resgatar recompensa. A recompensa permanecera ativa."
             ));
             return;
         }
@@ -79,13 +78,12 @@ public class BountyDeathListener extends EntityListener {
         for (Bounty bounty : bountiesOnVictim) {
             totalBounty += bounty.getAmount();
         }
-
         if (totalBounty > 0) {
             killer.getInventory().addItem(new org.bukkit.inventory.ItemStack(Material.IRON_INGOT, totalBounty));
             Bukkit.broadcastMessage(
                     BlockyBounty.getInstance().getMessageManager().get(
-                        "bounty.payment",
-                        "&c[Bounty] {killer} eliminou {target} e recebeu &e{amount} ferros &cde recompensa!"
+                            "bounty.payment",
+                            "&c[Bounty] {killer} eliminou {target} e recebeu &e{amount} ferros &cde recompensa!"
                     )
                     .replace("{killer}", killer.getName())
                     .replace("{target}", victim.getName())
