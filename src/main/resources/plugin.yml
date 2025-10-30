@@ -1,6 +1,15 @@
 name: BlockyBounty
-version: 1.0.0
 main: com.blockycraft.blockybounty.BlockyBounty
+version: 1.0
 author: Bernardo Zukerman
-description: Adicione sistema de recompensas ao eliminar outro jogador
-api-version: 1.0
+description: Plugin de recompensas (bounties) por cabeça de jogador para servidores com BlockyFactions.
+softdepend: [BlockyFactions]
+commands:
+  bounty:
+    description: Coloca, remove, lista recompensas por outros jogadores (/bounty <jogador> <qtd>, /bounty remover <jogador>, /bounty list)
+    usage: /bounty <jogador> <quantidade> | /bounty remover <jogador> | /bounty list
+    permission: blockybounty.bounty
+permissions:
+  blockybounty.bounty:
+    description: Permite criar, remover e listar recompensas.
+    default: true
