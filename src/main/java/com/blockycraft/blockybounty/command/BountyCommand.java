@@ -180,13 +180,16 @@ public class BountyCommand implements CommandExecutor {
 
     private void sendUsage(Player player) {
         player.sendMessage(BlockyBounty.getInstance().getMessageManager().get(
-            "bounty.usage1","&bUse: &c/bounty <jogador> <quantidade>"
+            "bounty.help.header","&f--- Comandos de &dBounty &f---"
         ));
         player.sendMessage(BlockyBounty.getInstance().getMessageManager().get(
-            "bounty.usage2","&bUse: &c/bounty remover <jogador>"
+            "bounty.help1","&d/bounty <jogador> <quantidade> &7- coloca uma recompensa em um jogador"
         ));
         player.sendMessage(BlockyBounty.getInstance().getMessageManager().get(
-            "bounty.usage3","&bUse: &c/bounty list"
+            "bounty.help2","&d/bounty remover <jogador> &7- remove a recompensa"
+        ));
+        player.sendMessage(BlockyBounty.getInstance().getMessageManager().get(
+            "bounty.help3","&d/bounty list &7- lista as recompensas ativas"
         ));
     }
 }
