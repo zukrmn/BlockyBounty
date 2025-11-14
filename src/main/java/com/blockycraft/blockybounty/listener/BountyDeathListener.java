@@ -3,6 +3,8 @@ package com.blockycraft.blockybounty.listener;
 import com.blockycraft.blockybounty.BlockyBounty;
 import com.blockycraft.blockybounty.data.Bounty;
 import com.blockycraft.blockybounty.manager.BountyManager;
+import com.blockycraft.blockybounty.lang.LanguageManager;
+import com.blockycraft.blockybounty.geoip.GeoIPManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -12,12 +14,18 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class BountyDeathListener implements Listener {
     private final BountyManager bountyManager;
+    private final LanguageManager languageManager;
+    private final GeoIPManager geoIPManager;
 
     public BountyDeathListener(BlockyBounty plugin) {
         this.bountyManager = plugin.getBountyManager();
+        this.languageManager = plugin.getLanguageManager();
+        this.geoIPManager = plugin.getGeoIPManager();
     }
 
     @EventHandler
@@ -25,7 +33,6 @@ public class BountyDeathListener implements Listener {
         if (!(event.getEntity() instanceof Player)) return;
         Player victim = (Player) event.getEntity();
 
-        // Obtém killer compatível com Bukkit 1060: último golpe
         Player killer = null;
         EntityDamageEvent lastDamage = victim.getLastDamageCause();
         if (lastDamage instanceof EntityDamageByEntityEvent) {
@@ -40,7 +47,6 @@ public class BountyDeathListener implements Listener {
         List<Bounty> bountiesOnVictim = bountyManager.getBountiesForTarget(victim.getUniqueId().toString());
         if (bountiesOnVictim == null || bountiesOnVictim.isEmpty()) return;
 
-        // Checagem robusta de facção: só bloqueia recompensa se ambos estiverem em facção válida/igual
         boolean bloqueia = false;
         try {
             Class<?> api = Class.forName("com.blockycraft.blockyfactions.api.BlockyFactionsAPI");
@@ -66,11 +72,10 @@ public class BountyDeathListener implements Listener {
             // fallback: não bloqueia, paga recompensa
         }
 
+        String lang = geoIPManager.getPlayerLanguage(killer);
+
         if (bloqueia) {
-            killer.sendMessage(BlockyBounty.getInstance().getMessageManager().get(
-                    "bounty.killer-faction",
-                    "&cJogadores da mesma faccao nao podem resgatar recompensa. A recompensa permanecera ativa."
-            ));
+            killer.sendMessage(languageManager.get(lang, "bounty.killer-faction"));
             return;
         }
 
@@ -80,16 +85,13 @@ public class BountyDeathListener implements Listener {
         }
         if (totalBounty > 0) {
             killer.getInventory().addItem(new org.bukkit.inventory.ItemStack(Material.IRON_INGOT, totalBounty));
-            Bukkit.broadcastMessage(
-                    BlockyBounty.getInstance().getMessageManager().get(
-                            "bounty.payment",
-                            "&c[Bounty] {killer} eliminou {target} e recebeu &e{amount} ferros &cde recompensa!"
-                    )
-                    .replace("{killer}", killer.getName())
-                    .replace("{target}", victim.getName())
-                    .replace("{amount}", String.valueOf(totalBounty))
-            );
-            // Remove todas as bounties sobre o alvo (independente do setter estar online)
+            
+            Map<String, String> placeholders = new HashMap<>();
+            placeholders.put("killer", killer.getName());
+            placeholders.put("target", victim.getName());
+            placeholders.put("amount", String.valueOf(totalBounty));
+
+            Bukkit.broadcastMessage(languageManager.get("en", "bounty.payment", placeholders));
             bountyManager.removeAllBountiesForTarget(victim.getUniqueId().toString());
         }
     }

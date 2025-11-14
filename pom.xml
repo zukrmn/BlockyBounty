@@ -32,7 +32,21 @@
             <scope>system</scope>
             <systemPath>${minecraft.server.path}/server.jar</systemPath>
         </dependency>
-        </dependencies>
+        <dependency>
+            <groupId>com.blockycraft</groupId>
+            <artifactId>blockygeoip</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>${minecraft.server.path}/plugins/BlockyGeoIP.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.blockycraft</groupId>
+            <artifactId>blockyfactions</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>${minecraft.server.path}/plugins/BlockyFactions.jar</systemPath>
+        </dependency>
+    </dependencies>
 
     <build>
         <defaultGoal>clean package</defaultGoal>

@@ -1,12 +1,14 @@
 package com.blockycraft.blockybounty;
 
 import com.blockycraft.blockybounty.command.BountyCommand;
+import com.blockycraft.blockybounty.geoip.GeoIPManager;
+import com.blockycraft.blockybounty.lang.LanguageManager;
 import com.blockycraft.blockybounty.listener.BountyDeathListener;
 import com.blockycraft.blockybounty.manager.BountyManager;
 import com.blockycraft.blockybounty.database.BountyDatabaseManager;
 import java.io.File;
 import java.io.InputStream;
-import java.io.FileOutputStream;
+import java.util.Properties;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -15,19 +17,19 @@ public class BlockyBounty extends JavaPlugin {
     private static BlockyBounty instance;
     private BountyManager bountyManager;
     private BountyDatabaseManager bountyDatabaseManager;
-    private MessageManager messageManager;
+    private LanguageManager languageManager;
+    private GeoIPManager geoIPManager;
+    private Properties properties;
+    private File configFile;
 
     public void onEnable() {
         instance = this;
-        if (!getDataFolder().exists()) {
-            getDataFolder().mkdirs();
-        }
+        
+        saveDefaultConfig();
+        reloadProperties();
 
-        // Copiar messages.properties para a pasta do plugin, se não existir
-        saveResourceIfNotExists("messages.properties", new File(getDataFolder(), "messages.properties"));
-
-        // Carregar mensagens personalizadas (.properties)
-        messageManager = new MessageManager(getDataFolder());
+        languageManager = new LanguageManager(this);
+        geoIPManager = new GeoIPManager();
 
         try {
             File dbFile = new File(getDataFolder(), "bounties.db");
@@ -71,30 +73,47 @@ public class BlockyBounty extends JavaPlugin {
         return bountyDatabaseManager;
     }
 
-    public MessageManager getMessageManager() {
-        return messageManager;
+    public LanguageManager getLanguageManager() {
+        return languageManager;
     }
 
-    // UTILITÁRIO: Copia um resource do JAR para o disco, caso não exista.
-    private void saveResourceIfNotExists(String resource, File targetFile) {
-        if (!targetFile.exists()) {
-            try {
-                InputStream in = getClass().getClassLoader().getResourceAsStream(resource);
+    public GeoIPManager getGeoIPManager() {
+        return geoIPManager;
+    }
+
+    public Properties getProperties() {
+        if (properties == null) {
+            reloadProperties();
+        }
+        return properties;
+    }
+
+    public void reloadProperties() {
+        if (configFile == null) {
+            configFile = new File(getDataFolder(), "config.properties");
+        }
+        properties = new Properties();
+        try (InputStream input = new java.io.FileInputStream(configFile)) {
+            properties.load(input);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void saveDefaultConfig() {
+        if (configFile == null) {
+            configFile = new File(getDataFolder(), "config.properties");
+        }
+        if (!configFile.exists()) {
+            try (InputStream in = getClass().getClassLoader().getResourceAsStream("config.properties")) {
                 if (in != null) {
-                    FileOutputStream out = new FileOutputStream(targetFile);
-                    byte[] buffer = new byte[1024];
-                    int len;
-                    while ((len = in.read(buffer)) > 0) {
-                        out.write(buffer, 0, len);
+                    if (!getDataFolder().exists()) {
+                        getDataFolder().mkdirs();
                     }
-                    out.close();
-                    in.close();
-                    System.out.println("[BlockyBounty] Arquivo " + resource + " copiado para " + targetFile.getAbsolutePath());
-                } else {
-                    System.err.println("[BlockyBounty] Resource " + resource + " não encontrado no JAR! Crie manualmente.");
+                    java.nio.file.Files.copy(in, configFile.toPath());
                 }
-            } catch (Exception e) {
-                System.err.println("[BlockyBounty] Erro ao copiar " + resource + ": " + e.getMessage());
+            } catch (java.io.IOException e) {
+                e.printStackTrace();
             }
         }
     }
