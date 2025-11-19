@@ -49,18 +49,18 @@ public class BountyDeathListener implements Listener {
 
         boolean bloqueia = false;
         try {
-            Class<?> api = Class.forName("com.blockycraft.blockyfactions.api.BlockyFactionsAPI");
-            String killerFaction = (String) api.getMethod("getPlayerFaction", String.class).invoke(null, killer.getName());
-            String victimFaction = (String) api.getMethod("getPlayerFaction", String.class).invoke(null, victim.getName());
-            if (killerFaction != null && !killerFaction.isEmpty()
-                    && victimFaction != null && !victimFaction.isEmpty()
-                    && killerFaction.equals(victimFaction)) {
+            Class<?> api = Class.forName("com.blockycraft.blockygroups.api.BlockyGroupsAPI");
+            String killerGroup = (String) api.getMethod("getPlayerGroup", String.class).invoke(null, killer.getName());
+            String victimGroup = (String) api.getMethod("getPlayerGroup", String.class).invoke(null, victim.getName());
+            if (killerGroup != null && !killerGroup.isEmpty()
+                    && victimGroup != null && !victimGroup.isEmpty()
+                    && killerGroup.equals(victimGroup)) {
                 bloqueia = true;
             }
         } catch (NoSuchMethodException nsme) {
             try {
-                Class<?> api = Class.forName("com.blockycraft.blockyfactions.api.BlockyFactionsAPI");
-                Object res = api.getMethod("arePlayersInSameFaction", String.class, String.class)
+                Class<?> api = Class.forName("com.blockycraft.blockygroups.api.BlockyGroupsAPI");
+                Object res = api.getMethod("arePlayersInSameGroup", String.class, String.class)
                         .invoke(null, killer.getName(), victim.getName());
                 if (res instanceof Boolean && ((Boolean) res)) {
                     bloqueia = true;
@@ -75,7 +75,7 @@ public class BountyDeathListener implements Listener {
         String lang = geoIPManager.getPlayerLanguage(killer);
 
         if (bloqueia) {
-            killer.sendMessage(languageManager.get(lang, "bounty.killer-faction"));
+            killer.sendMessage(languageManager.get(lang, "bounty.killer-group"));
             return;
         }
 

@@ -97,18 +97,18 @@ public class BountyCommand implements CommandExecutor {
             }
             boolean bloqueia = false;
             try {
-                Class<?> api = Class.forName("com.blockycraft.blockyfactions.api.BlockyFactionsAPI");
-                String setterFaction = (String) api.getMethod("getPlayerFaction", String.class).invoke(null, player.getName());
-                String targetFaction = (String) api.getMethod("getPlayerFaction", String.class).invoke(null, target.getName());
-                if (setterFaction != null && !setterFaction.isEmpty() &&
-                    targetFaction != null && !targetFaction.isEmpty() &&
-                    setterFaction.equals(targetFaction)) {
+                Class<?> api = Class.forName("com.blockycraft.blockygroups.api.BlockyGroupsAPI");
+                String setterGroup = (String) api.getMethod("getPlayerGroup", String.class).invoke(null, player.getName());
+                String targetGroup = (String) api.getMethod("getPlayerGroup", String.class).invoke(null, target.getName());
+                if (setterGroup != null && !setterGroup.isEmpty() &&
+                    targetGroup != null && !targetGroup.isEmpty() &&
+                    setterGroup.equals(targetGroup)) {
                     bloqueia = true;
                 }
             } catch (NoSuchMethodException nsme) {
                 try {
-                    Class<?> api = Class.forName("com.blockycraft.blockyfactions.api.BlockyFactionsAPI");
-                    Object res = api.getMethod("arePlayersInSameFaction", String.class, String.class)
+                    Class<?> api = Class.forName("com.blockycraft.blockygroups.api.BlockyGroupsAPI");
+                    Object res = api.getMethod("arePlayersInSameGroup", String.class, String.class)
                             .invoke(null, player.getName(), target.getName());
                     if (res instanceof Boolean && ((Boolean) res)) {
                         bloqueia = true;
@@ -120,7 +120,7 @@ public class BountyCommand implements CommandExecutor {
                 // fallback: não bloqueia
             }
             if (bloqueia) {
-                player.sendMessage(languageManager.get(lang, "bounty.self-faction"));
+                player.sendMessage(languageManager.get(lang, "bounty.self-group"));
                 return true;
             }
 

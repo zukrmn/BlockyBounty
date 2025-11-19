@@ -2,8 +2,8 @@ name: BlockyBounty
 main: com.blockycraft.blockybounty.BlockyBounty
 version: 1.0
 author: Bernardo Zukerman
-description: Plugin de recompensas (bounties) por cabeça de jogador para servidores com BlockyFactions.
-softdepend: [BlockyFactions]
+description: Plugin de recompensas (bounties) por cabeça de jogador para servidores com BlockyGroups.
+softdepend: [BlockyGroups]
 commands:
   bounty:
     description: Coloca, remove, lista recompensas por outros jogadores (/bounty <jogador> <qtd>, /bounty remover <jogador>, /bounty list)
